@@ -1,0 +1,43 @@
+name: deploy_api
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "dev | prd"
+        default: "dev"
+        required: true
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_REGION: asia-northeast1
+  GCP_REPOSITORY: ${{ secrets.GCP_REPOSITORY }}
+  GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      IMAGE: ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GCP_REPOSITORY}/api
+      TAG: ${{ github.sha }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          service_account_key: ${GCP_SA_KEY}
+          export_default_credentials: true
+      - name: Configure gcloud
+        run: |
+          gcloud config set project ${GCP_PROJECT_ID}
+          gcloud config set run/platform managed
+          gcloud config set run/region ${GCP_REGION}
+          gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev
+      - name: Build docker image
+        run: docker image build --platform linux/amd64 -t ${IMAGE}:${TAG} --target release .
+      - name: Push docker image
+        run: docker image push ${IMAGE}:${TAG}
+      - name: Deploy docker image to Cloud Run
+        run: gcloud run deploy api --image ${IMAGE}:${TAG}
