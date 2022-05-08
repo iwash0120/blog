@@ -7,7 +7,7 @@ import (
 )
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "<h1>Hello AMD64</h1>")
+	fmt.Fprintf(w, "<h1>Hello Cloud Build</h1>")
 }
 
 func main() {
