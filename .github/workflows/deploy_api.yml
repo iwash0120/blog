@@ -8,18 +8,13 @@ on:
         default: "dev"
         required: true
 
-env:
-  GCP_PROJECT_ID: '${{ secrets.GCP_PROJECT_ID }}'
-  GCP_REGION: 'asia-northeast1'
-  GCP_REPOSITORY: '${{ secrets.GCP_REPOSITORY }}'
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      IMAGE: ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GCP_REPOSITORY}/api
-      TAG: ${{ github.sha }}
+      IMAGE: '${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY }}/api'
+      TAG: '${{ github.sha }}'
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -31,10 +26,10 @@ jobs:
         uses: google-github-actions/setup-gcloud@v0
       - name: Configure gcloud
         run: |
-          gcloud config set project ${GCP_PROJECT_ID}
+          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
           gcloud config set run/platform managed
-          gcloud config set run/region ${GCP_REGION}
-          gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev
+          gcloud config set run/region ${{ secrets.GCP_REGION }}
+          gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev
       - name: Build docker image
         run: docker image build --platform linux/amd64 -t ${IMAGE}:${TAG} --target release .
       - name: Push docker image
