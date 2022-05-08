@@ -8,15 +8,13 @@ on:
         default: "dev"
         required: true
 
-env:
-  GCP_REGION: asia-northeast1
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      IMAGE: '${{ env.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY }}/api'
+      GCP_REGION: asia-northeast1
+      IMAGE: 'asia-northeast1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY }}/api'
       TAG: '${{ github.sha }}'
     steps:
       - name: checkout
