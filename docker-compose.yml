@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  api:
+    image: blog-api
+    container_name: blog-api
+    build: ./api
+    ports:
+      - 8080:8080
+    volumes:
+      - ./api:/app
+    environment:
+      - PORT=8080
